@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edirear Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #00f2c3; /* TikTok green */
+            --secondary: #00f2c3; /* TikTok green */
+            --dark: #000000; /* Pure black */
+            --darker: #000000; /* Pure black */
+            --light: #ffffff; /* White text */
+            --gray: #1a1a1a; /* Dark gray for elements */
+            --light-gray: #a0a0a0;
+            --card-bg: #121212; /* Card background */
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: var(--darker);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Header Styles */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-btn {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px 15px;
+            height: calc(100vh - 130px);
+            overflow-y: auto;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .bot-message {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            position: relative;
+            line-height: 1.4;
+        }
+
+        .user-message .message-bubble {
+            background: var(--gradient);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message .message-bubble {
+            background-color: var(--card-bg);
+            color: var(--light);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--light-gray);
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .bot-message .message-time {
+            text-align: left;
+        }
+
+        /* Input Area */
+        .input-container {
+            position: sticky;
+            bottom: 0;
+            background-color: var(--darker);
+            padding: 15px;
+            border-top: 1px solid var(--gray);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            background-color: var(--gray);
+            border: none;
+            border-radius: 24px;
+            padding: 12px 18px;
+            color: var(--light);
+            font-size: 16px;
+            outline: none;
+        }
+
+        .message-input::placeholder {
+            color: var(--light-gray);
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--gradient);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .welcome-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .welcome-subtitle {
+            color: var(--light-gray);
+            margin-bottom: 30px;
+        }
+
+        .suggestions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .suggestion {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: 1px solid #333;
+        }
+
+        .suggestion:hover {
+            background-color: var(--gray);
+            border-color: var(--primary);
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 12px 16px;
+            background-color: var(--card-bg);
+            border-radius: 18px;
+            width: fit-content;
+            margin-bottom: 20px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .app-container {
+                max-width: 100%;
+            }
+            
+            .suggestions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--light-gray);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="logo-text">Edirear Assistant</div>
+            </div>
+            <div class="header-actions">
+                <button class="header-btn" id="history-btn">
+                    <i class="fas fa-history"></i>
+                </button>
+                <button class="header-btn" id="theme-btn">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="chat-container">
+                <div class="chat-history" id="chat-history">
+                    <!-- Welcome Screen -->
+                    <div class="welcome-screen" id="welcome-screen">
+                        <div class="welcome-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h1 class="welcome-title">Edirear Assistant</h1>
+                        <p class="welcome-subtitle">Your AI-powered assistant for any question</p>
+                        
+                        <div class="suggestions">
+                            <div class="suggestion" data-question="What is artificial intelligence?">
+                                What is AI?
+                            </div>
+                            <div class="suggestion" data-question="How does machine learning work?">
+                                How does ML work?
+                            </div>
+                            <div class="suggestion" data-question="Tell me about the future of technology">
+                                Future of tech
+                            </div>
+                            <div class="suggestion" data-question="Explain quantum computing in simple terms">
+                                Quantum computing
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-container">
+            <div class="input-wrapper">
+                <input type="text" class="message-input" id="message-input" placeholder="Ask me anything...">
+                <button class="send-btn" id="send-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_CONFIG = {
+            API_KEY: 'AIzaSyAMBF1xeNkSJgbgbFh_MG1UKIdX1zBm8y4',
+            API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+        };
+
+        // Edirear Assistant Class
+        class EdirearAssistant {
+            constructor() {
+                this.chatHistory = JSON.parse(localStorage.getItem('edirearChatHistory')) || [];
+                this.isDarkMode = localStorage.getItem('edirearDarkMode') !== 'false';
+                this.currentTypingIndicator = null;
+                
+                this.init();
+            }
+
+            init() {
+                this.cacheDOM();
+                this.bindEvents();
+                this.loadChatHistory();
+                this.applyTheme();
+            }
+
+            cacheDOM() {
+                this.chatHistoryElement = document.getElementById('chat-history');
+                this.messageInput = document.getElementById('message-input');
+                this.sendButton = document.getElementById('send-btn');
+                this.welcomeScreen = document.getElementById('welcome-screen');
+                this.historyButton = document.getElementById('history-btn');
+                this.themeButton = document.getElementById('theme-btn');
+            }
+
+            bindEvents() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendMessage();
+                });
+
+                this.historyButton.addEventListener('click', () => this.toggleHistory());
+                this.themeButton.addEventListener('click', () => this.toggleTheme());
+
+                // Quick suggestion buttons
+                document.querySelectorAll('.suggestion').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const question = e.target.getAttribute('data-question');
+                        this.messageInput.value = question;
+                        this.sendMessage();
+                    });
+                });
+            }
+
+            sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+
+                // Add user message to chat
+                this.addMessage('user', message);
+                this.messageInput.value = '';
+                this.hideWelcomeScreen();
+
+                // Show typing indicator
+                this.showTypingIndicator();
+
+                // Send to AI API
+                this.queryAI(message)
+                    .then(response => {
+                        this.removeTypingIndicator();
+                        this.addMessage('bot', response);
+                        this.saveChatHistory();
+                    })
+                    .catch(error => {
+                        this.removeTypingIndicator();
+                        this.addMessage('bot', 'Sorry, I encountered an error. Please try again.');
+                        console.error('AI Error:', error);
+                    });
+            }
+
+            async queryAI(message) {
+                const requestBody = {
+                    contents: [{
+                        parts: [{
+                            text: message
+                        }]
+                    }]
+                };
+
+                const response = await fetch(`${API_CONFIG.API_URL}?key=${API_CONFIG.API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                    return data.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error('Invalid response format from API');
+                }
+            }
+
+            addMessage(sender, text) {
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${sender}-message`;
+                
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                messageElement.innerHTML = `
+                    <div class="message-bubble">
+                        ${this.formatMessage(text)}
+                        <div class="message-time">${time}</div>
+                    </div>
+                `;
+                
+                this.chatHistoryElement.appendChild(messageElement);
+                this.scrollToBottom();
+                
+                // Add to chat history
+                this.chatHistory.push({
+                    sender,
+                    text,
+                    time: new Date().toISOString()
+                });
+            }
+
+            formatMessage(text) {
+                // Format the AI response with better styling
+                let formattedText = text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/^(#{1,6})\s(.*$)/gm, (match, hashes, content) => {
+                        const level = hashes.length;
+                        return `<h${level} style="margin: 10px 0; font-weight: 600;">${content}</h${level}>`;
+                    })
+                    .replace(/\n/g, '<br>');
+                
+                return formattedText;
+            }
+
+            showTypingIndicator() {
+                this.currentTypingIndicator = document.createElement('div');
+                this.currentTypingIndicator.className = 'message bot-message';
+                this.currentTypingIndicator.innerHTML = `
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                `;
+                
+                this.chatHistoryElement.appendChild(this.currentTypingIndicator);
+                this.scrollToBottom();
+            }
+
+            removeTypingIndicator() {
+                if (this.currentTypingIndicator) {
+                    this.currentTypingIndicator.remove();
+                    this.currentTypingIndicator = null;
+                }
+            }
+
+            hideWelcomeScreen() {
+                if (this.welcomeScreen) {
+                    this.welcomeScreen.style.display = 'none';
+                }
+            }
+
+            scrollToBottom() {
+                this.chatHistoryElement.scrollTop = this.chatHistoryElement.scrollHeight;
+            }
+
+            saveChatHistory() {
+                localStorage.setItem('edirearChatHistory', JSON.stringify(this.chatHistory));
+            }
+
+            loadChatHistory() {
+                if (this.chatHistory.length > 0) {
+                    this.hideWelcomeScreen();
+                    
+                    this.chatHistory.forEach(message => {
+                        const messageElement = document.createElement('div');
+                        messageElement.className = `message ${message.sender}-message`;
+                        
+                        const time = new Date(message.time).toLocaleTimeString([], { 
+                            hour: '2-digit', minute: '2-digit' 
+                        });
+                        
+                        messageElement.innerHTML = `
+                            <div class="message-bubble">
+                                ${this.formatMessage(message.text)}
+                                <div class="message-time">${time}</div>
+                            </div>
+                        `;
+                        
+                        this.chatHistoryElement.appendChild(messageElement);
+                    });
+                    
+                    this.scrollToBottom();
+                }
+            }
+
+            toggleHistory() {
+                if (confirm('Clear chat history?')) {
+                    this.chatHistory = [];
+                    localStorage.removeItem('edirearChatHistory');
+                    location.reload();
+                }
+            }
+
+            toggleTheme() {
+                this.isDarkMode = !this.isDarkMode;
+                localStorage.setItem('edirearDarkMode', this.isDarkMode);
+                this.applyTheme();
+            }
+
+            applyTheme() {
+                const icon = this.themeButton.querySelector('i');
+                
+                if (this.isDarkMode) {
+                    document.documentElement.style.setProperty('--dark', '#000000');
+                    document.documentElement.style.setProperty('--darker', '#000000');
+                    document.documentElement.style.setProperty('--light', '#ffffff');
+                    icon.className = 'fas fa-moon';
+                } else {
+                    document.documentElement.style.setProperty('--dark', '#f5f5f5');
+                    document.documentElement.style.setProperty('--darker', '#ffffff');
+                    document.documentElement.style.setProperty('--light', '#333333');
+                    icon.className = 'fas fa-sun';
+                }
+            }
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.edirearAssistant = new EdirearAssistant();
+        });
+    </script>
+</body>
+</html>
